@@ -66,6 +66,15 @@ Viewer::Viewer( ViewerOptional v1, ViewerOptional v2, ViewerOptional v3, Calibra
 }
 
 
+/*  HELPERS  */
+
+void check_calibration_sanity() {
+    if( this.fovy < 0 || this.z_near < 0 || this.z_far < 0 )
+        throw ViewerException(CALIBRATION_SANITY_FAIL);
+    else if ( this.init_window_length < 0 || this.init_window_height < 0)
+        throw ViewerException(CALIBRATION_SANITY_FAIL);
+}
+
 
 /*  OpenGL and GLUT   */
 
@@ -134,5 +143,6 @@ void Viewer::model_display() {
                 // How we show normal depends on how they are computed (Not Known Yet, maybe per vertex?)
             glEnd();
         }
+    }
 }
 } // namespace

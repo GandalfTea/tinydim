@@ -9,6 +9,9 @@
 #ifndef TINYDIM_VIEWER
 #define TINYDIM_VIEWER
 
+#include <stdexcept>
+#include <map>
+
 // OpenGL
 #include <GL/glut.h>
 
@@ -17,11 +20,29 @@
 
 namespace tinydim {
 
+
+// Viewer Exception Handling
 typedef enum {
     OPENGL_INIT_FAILED,
     UNKNOWN_OPTIONAL,
-    UNKNOWN_TOPOLOGY
-} ViewerException;
+    UNKNOWN_TOPOLOGY,
+    CALIBRATION_SANITY_FAIL_WINDOW,
+    CALIBRATION_SANITY_FAIL_PERSPECTIVE
+} ViewerError;
+
+std::map<ViewError, std::string> exception_message = {
+    { UNKNOWN_OPTIONAL, "Unknown optional render option passed into constructor." },
+    { UNKNOWN_TOPOLOGY, "Unknown model topology passed into Viewer model_display() function." },
+    { CALIBRATION_SANITY_FAIL_WINDOW, "Calibration Sanity Check Failed. Please review the window size values of the Calibration struct." },
+    { CALIBRATION_SANITY_FAIL_WINDOW, "Calibration Sanity Check Failed. Please review the GLPerspective values of the Calibration struct." }
+};
+
+struct ViewerException {
+    ViewerException(ViewerError error) {
+        throw std::runtime_error("VIEWER EXCEPTION : " + exception_message[error]);
+    }
+}
+
 
 enum {
     VIEW_VERTICES,
@@ -29,7 +50,7 @@ enum {
     VIEW_NORMALS,
 } ViewerOptional;
 
-// TODO: Come up with a non-stupid name for this
+
 struct Calibration {
     double fovy = 45.f;
     double z_near = 0.1f;
