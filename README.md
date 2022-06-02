@@ -1,5 +1,7 @@
 
-Tiny dyper-dimensional object viewer.
+### Tiny hyper-dimensional object viewer.
+
+&nbsp;
 
 TODO:
 * Write good code
