@@ -56,5 +56,17 @@ struct Direction {
     }
 }
 
+
+// HYPER-DIMENTIONAL HELPERS
+
+// Map 360 <-> 720
+#define 360TO720(x) x*2
+#define 720TO360(x) x/2
+
+// Map any degree space to 360
+#define 360TOX(space, y) (y * space) / 360
+#define XTO360(space, y) (y * 360) / space
+
+
 } // namespace
 #endif
