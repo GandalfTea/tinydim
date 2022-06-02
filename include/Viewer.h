@@ -19,8 +19,8 @@ namespace tinydim {
 
 typedef enum {
     OPENGL_INIT_FAILED,
-    UNKNOWN_OPTIONAL
-    // to be completed
+    UNKNOWN_OPTIONAL,
+    UNKNOWN_TOPOLOGY
 } ViewerException;
 
 enum {
@@ -88,8 +88,7 @@ class Viewer {
         // OpenGL Functions
         void reshape( GLsizei width, GLsizei height );
         void mouse_motion( int x, int y );
-        void model_display( Model<Quads> model );
-        void model_display( Model<Trig> model );
+        void model_display();
 }
 
 } // namespace

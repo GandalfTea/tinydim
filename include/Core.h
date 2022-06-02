@@ -24,18 +24,31 @@ struct Vertex {
 
 // TODO: Make these store only pointers
 struct Quad {
-    Vertex points[4];
+    Vertex* points[4];
     float normal[3];
 };
 
 struct Trig {
-    Vertex points[3];
+    Vertex* points[3];
     float normal[3];
 };
+
+// unit vector
+struct Normal {
+   float x, y, z; 
+}
+
+enum {
+    MODEL_QUADS,
+    MODEL_TRIANGLES
+} ModelTopography;
 
 template <typename Topography>
 struct Model {
     std::vector<Topography> geometry;
+    std::vector<Vertex> vertices;
+    std::vector<Normal> normals;
+    ModelTopography topography = MODEL_QUADS;
 };
 
 

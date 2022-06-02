@@ -83,70 +83,56 @@ void Viewer::mouse_motion( int x, int y ) {
 }
 
 
-
-// TODO: glutDisplayFunc might not like overloading this function
-// Might want to merge the two
-
-void Viewer::model_display( Model<Quad> model ) {
+// Iterate through the models vector and render each depending on topology type
+void Viewer::model_display() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // if moved, gluLookAt
+    // if camera moved, gluLookAt
 
     // auto rotation around origin ?
 
-    if( this.show_vertices ) {
-        glBegin(GL_POINTS);
-        glColor3f(0.0, 1.0f, 1.0f);
-            // iterate through vertex vector
-        glEnd();
+    for( auto *model : this.models ) {
+        if( this.show_vertices ) {
+            glBegin(GL_POINTS);
+            glColor3f(0.0, 1.0f, 1.0f);
+                for( auto i : model.vertices ) {
+                   glVertex3f( i.x, i.y, i.z ); 
+                }
+            glEnd();
 
-    } else if( this.show_topography) {
-        glBegin(GL_QUADS);
+        } else if( this.show_topography) {
+            if( model.topography == MODEL_QUADS ) {
+                glBegin(GL_QUADS);
+                glColor3f(0.4f, 0.4f, 0.4f);    // Set to color of quad
+                for( size_t i{}; i < model.geometry.size(); i+= 4 ) {
+                    glVertex3f( model.vertices[i].x,   model.vertices[i].y,   model.vertices[i].z);
+                    glVertex3f( model.vertices[i+1].x, model.vertices[i+1].y, model.vertices[i+1].z);
+                    glVertex3f( model.vertices[i+2].x, model.vertices[i+2].y, model.vertices[i+2].z);
+                    glVertex3f( model.vertices[i+3].x, model.vertices[i+3].y, model.vertices[i+3].z);
+                }
+            } else if( model.topography == MODEL_TRIANGLES ) {
+                glBegin(GL_TRIANGLES);
+                glColor3f(0.4f, 0.4f, 0.4f);    // Set to color of quad
+                for( size_t i{}; i < model.geometry.size(); i+= 3 ) {
+                    glVertex3f( model.vertices[i].x,   model.vertices[i].y,   model.vertices[i].z);
+                    glVertex3f( model.vertices[i+1].x, model.vertices[i+1].y, model.vertices[i+1].z);
+                    glVertex3f( model.vertices[i+2].x, model.vertices[i+2].y, model.vertices[i+2].z);
+                }
+            } else {
+                // TODO: Fix this shit
+                throw ViewerException(UNKNOWN_TOPOLOGY);
+                return;
+            }
+            glEnd();
 
-        // Set to color of quad
-        glColor3f(0.4f, 0.4f, 0.4f);
-            // iterate through each quad vertex coordinate and create vertex
-        glEnd();
-    } else if( this.show_normals) {
-        glBegin(GL_LINES);
-        glLineWidth(0.001);
-        glColor3f(1.0f, 0.5f, 0.2f);    // Orange color
-            // Iterate through normals
-        glEnd();
-    }
+        } else if( this.show_normals) {
+            glBegin(GL_LINES);
+            glLineWidth(0.001);
+            glColor3f(1.0f, 0.5f, 0.2f);    // Orange color
+                // How we show normal depends on how they are computed (Not Known Yet, maybe per vertex?)
+            glEnd();
+        }
 }
-
-void Viewer::model_display( Model<Trig> model ) {
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    // if moved, gluLookAt
-
-    // auto rotation around origin ?
-
-    if( this.show_vertices ) {
-        glBegin(GL_POINTS);
-        glColor3f(0.0, 1.0f, 1.0f);
-            // iterate through vertex vector
-        glEnd();
-
-    } else if( this.show_topography) {
-        glBegin(GL_TRIANGLES);
-
-        // Set to color of quad
-        glColor3f(0.4f, 0.4f, 0.4f);
-            // iterate through each trig vertex coordinate and create vertex
-        glEnd();
-    } else if( this.show_normals) {
-        glBegin(GL_LINES);
-        glLineWidth(0.001);
-        glColor3f(1.0f, 0.5f, 0.2f);    // Orange color
-            // Iterate through normals
-        glEnd();
-    }
-}
-
 } // namespace
