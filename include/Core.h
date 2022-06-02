@@ -20,17 +20,8 @@ typedef unsigned char uchar;
 struct Vertex {
     float x, y, z;
     float color[3];
-};
 
-// TODO: Make these store only pointers
-struct Quad {
-    Vertex* points[4];
-    float normal[3];
-};
-
-struct Trig {
-    Vertex* points[3];
-    float normal[3];
+    Vertex( float X, float Y, float Z ) : x(X), y(Y), z(Z) {}
 };
 
 // unit vector
@@ -43,9 +34,8 @@ enum {
     MODEL_TRIANGLES
 } ModelTopography;
 
-template <typename Topography>
 struct Model {
-    std::vector<Topography> geometry;
+    std::vector<uint32_t> geometry;
     std::vector<Vertex> vertices;
     std::vector<Normal> normals;
     ModelTopography topography = MODEL_QUADS;
