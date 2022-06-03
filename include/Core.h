@@ -5,6 +5,10 @@
 
 #define _USE_MATH_DEFINES // import constants from cmath
 #include <cmath>
+#include <cassert>
+#include <vector>
+#include <map>
+#include <stdexcept>
 
 namespace tinydim {
 
@@ -24,12 +28,20 @@ struct Vertex {
     Vertex( float X, float Y, float Z ) : x(X), y(Y), z(Z) {}
 };
 
+inline std::ostream& operator<< (std::ostream& outs, Vertex v) {
+    std::string repr = "[ ";
+    repr += std::to_string(v.x) + " ";
+    repr += std::to_string(v.y) + " ";
+    repr += std::to_string(v.z) + " ]";
+    return outs << repr;
+}
+
 // unit vector
 struct Normal {
    float x, y, z; 
-}
+};
 
-enum {
+typedef enum {
     MODEL_QUADS,
     MODEL_TRIANGLES
 } ModelTopography;
@@ -53,21 +65,21 @@ struct Direction {
     // normalize the vector into a unit vector
     Direction( float x, float y, float z ) {
        float len = sqrt( pow(x, 2) + pow(y, 2) + pow(z, 2) ); 
-        this.x = x / len;
-        this.y = y / len;
-        this.z = z / len;
+        this->x = x / len;
+        this->y = y / len;
+        this->z = z / len;
     }
-}
+};
 
 
 // HYPER-DIMENTIONAL HELPERS
 
 // Map 360 <-> 720
-#define 360TO720(x) x*2
-#define 720TO360(x) x/2
+#define m360TO720(x) x*2
+#define m720TO360(x) x/2
 
 // Map any degree space to 360
-#define 360TOX(space, y) (y * space) / 360
+#define m360TOX(space, y) (y * space) / 360
 #define XTO360(space, y) (y * 360) / space
 
 

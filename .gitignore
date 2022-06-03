@@ -20,3 +20,9 @@ tags
 a.exe
 a.out
 
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+libViewer.a
+tests

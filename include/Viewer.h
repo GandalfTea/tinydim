@@ -9,14 +9,11 @@
 #ifndef TINYDIM_VIEWER
 #define TINYDIM_VIEWER
 
-#include <stdexcept>
-#include <map>
-
 // OpenGL
 #include <GL/glut.h>
 
 // Local
-#include <Core.h>
+#include "./Core.h"
 
 namespace tinydim {
 
@@ -30,21 +27,16 @@ typedef enum {
     CALIBRATION_SANITY_FAIL_PERSPECTIVE
 } ViewerError;
 
-std::map<ViewError, std::string> exception_message = {
-    { UNKNOWN_OPTIONAL, "Unknown optional render option passed into constructor." },
-    { UNKNOWN_TOPOLOGY, "Unknown model topology passed into Viewer model_display() function." },
-    { CALIBRATION_SANITY_FAIL_WINDOW, "Calibration Sanity Check Failed. Please review the window size values of the Calibration struct." },
-    { CALIBRATION_SANITY_FAIL_WINDOW, "Calibration Sanity Check Failed. Please review the GLPerspective values of the Calibration struct." }
-};
+extern std::map<ViewerError, std::string> exception_message; 
 
 struct ViewerException {
     ViewerException(ViewerError error) {
         throw std::runtime_error("VIEWER EXCEPTION : " + exception_message[error]);
     }
-}
+};
 
 
-enum {
+typedef enum {
     VIEW_VERTICES,
     VIEW_TOPOGRAPHY,
     VIEW_NORMALS,
@@ -75,42 +67,42 @@ class Viewer {
         Viewer( ViewerOptional v1, ViewerOptional v2, Calibration c );
         Viewer( ViewerOptional v1, ViewerOptional v2, ViewerOptional v3, Calibration c );
 
-        Viewer( double fovy, double z_near, double z_far, init_window_length = 800,
-                init_window_height = 800, init_window_pos_x = 0, init_window_pos_y = 0);
+        Viewer( double fovy, double z_near, double z_far, uint16_t init_window_length = 800,
+                uint16_t init_window_height = 800, uint16_t init_window_pos_x = 0, uint16_t init_window_pos_y = 0);
 
         // Viewer can render both quads and triangles in the same scene
-        void load( Model<Quad> );
-        void load( Model<Trig> );
-
+        void load( Model* m );
         //void backgroundColor( float red, float green, float blue, float alpha );
-
         void start();
+
+        // Helpers
+        int howManyModels();
 
     private:
 
         // Optional Settings
-        bool show_vertices = false;
-        bool show_topography = false;
-        bool show_normals = false;
+        static bool show_vertices;
+        static bool show_topography;
+        static bool show_normals;
 
         // Variables
-        Model* models[]; // array of models to render
-        static float last_mouse_x = 0, last_mouse_y = 0;
+        static std::vector<Model*> models;
+        static constexpr float last_mouse_x = 0, last_mouse_y = 0;
         const float mouse_sensitivity = 0.0001f;
         float camera_pitch = 0, camera_yaw = 0; // in radians
 
         // Calibration
-        double fovy, z_near, z_far;
-        int init_window_length, init_window_height;
-        int init_window_pox_x, init_window_pos_y;
+        static double fovy, z_near, z_far;
+        static int init_window_length, init_window_height;
+        static int init_window_pos_x, init_window_pos_y;
 
         void check_calibration_sanity();
 
         // OpenGL Functions
-        void reshape( GLsizei width, GLsizei height );
-        void mouse_motion( int x, int y );
-        void model_display();
-}
+        static void reshape( GLsizei width, GLsizei height );
+        static void mouse_motion( int x, int y );
+        static void model_display();
+};
 
 } // namespace
 #endif

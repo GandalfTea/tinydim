@@ -2,7 +2,8 @@
 #ifndef TINYDIM_IO
 #define TINYDIM_IO
 
-#include <Core.h>
+#include "./Core.h"
+#include <fstream>
 
 namespace tinydim {
 
@@ -14,7 +15,7 @@ bool loadModel( const char* path , Model* ret) {
         
     // buffers
     std::vector<Vertex> vert_buffer{};
-    std::vector<Trig> face_buffer{};
+    std::vector<uint32_t> face_buffer{};
 
     std::string type;
     while( load_model>>type ) {
@@ -28,7 +29,7 @@ bool loadModel( const char* path , Model* ret) {
             case 'v': {
                 float x{}, y{}, z{};
                 load_model >> x >> y >> z;
-                vert_buffer.push_back( Vertex(x, y, z))
+                vert_buffer.push_back( Vertex(x, y, z));
                 break;
             }
             case 'f': {
@@ -58,7 +59,7 @@ bool loadModel( const char* path , Model* ret) {
 
     ret->vertices = vert_buffer;
     ret->geometry = face_buffer;
-    ret->topology = MODEL_TRIANGLES;
+    ret->topography = MODEL_TRIANGLES;
     return true;
 }
 
