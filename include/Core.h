@@ -43,7 +43,8 @@ struct Normal {
 
 typedef enum {
     MODEL_QUADS,
-    MODEL_TRIANGLES
+    MODEL_TRIANGLES,
+    MODEL_LINES
 } ModelTopography;
 
 struct Model {

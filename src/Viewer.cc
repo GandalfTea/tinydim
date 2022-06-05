@@ -23,13 +23,17 @@ std::vector<T> DEFAULT_VECTOR;
 double Viewer::fovy = 45.0f;
 double Viewer::z_near = 0.01f;
 double Viewer::z_far = 100.f;
+float Viewer::camera_pitch = 0;
+float Viewer::camera_yaw = 0;
+const float Viewer::mouse_sensitivity = 0.001;
 int Viewer::init_window_length = 800;
 int Viewer::init_window_height = 800;
 int Viewer::init_window_pos_x = 0;
 int Viewer::init_window_pos_y = 0;
-bool Viewer::show_vertices = false;
-bool Viewer::show_topography = false;
+bool Viewer::show_vertices = true;
+bool Viewer::show_topography = true;
 bool Viewer::show_normals = false;
+bool Viewer::first_render = true;
 std::vector<Model*> Viewer::models = DEFAULT_VECTOR<Model*>;
 
 
@@ -93,6 +97,7 @@ Viewer::Viewer( ViewerOptional v1, ViewerOptional v2, Calibration c ) {
     else if(v1 == VIEW_TOPOGRAPHY || v2 == VIEW_TOPOGRAPHY) this->show_topography = true;
     else if(v1 == VIEW_NORMALS || v2 == VIEW_NORMALS) this->show_normals = true;
     else throw ViewerException(UNKNOWN_OPTIONAL);
+
 }
 
 Viewer::Viewer( ViewerOptional v1, ViewerOptional v2, ViewerOptional v3, Calibration c ) {
@@ -128,25 +133,31 @@ void InitGL() {
     glDepthFunc(GL_LEQUAL);
     glShadeModel(GL_SMOOTH);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    //glutSetCursor( GLUT_CURSOR_NONE );
 }
 
 void Viewer::start() {
     int argc = 0;
     char** argv = (char**)'c';
     glutInit( &argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize( this->init_window_length, this->init_window_height);
     glutInitWindowPosition( this->init_window_pos_x, this->init_window_pos_y);
     glutCreateWindow("TinyDim");
+
+    InitGL();
 
     glutDisplayFunc(this->model_display);
     glutReshapeFunc(this->reshape);
     glutIdleFunc(this->model_display);
     glutPassiveMotionFunc(this->mouse_motion);
 
-    InitGL();
+    glutTimerFunc(0, timer, 0);
+
+    gluLookAt(0, 0.0f, 0, 0, 0, 0, 0.0f, 1.0f, 0.0f);
 
     glutMainLoop();
+
     return;
 }
 
@@ -165,6 +176,7 @@ int Viewer::howManyModels() {
 
 /*  OpenGL and GLUT   */
 
+
 void Viewer::reshape( GLsizei width, GLsizei height ) {
     if( height = 0 ) height = 1;
     GLfloat aspect = (GLfloat) width / (GLfloat) height;
@@ -175,15 +187,39 @@ void Viewer::reshape( GLsizei width, GLsizei height ) {
 }
 
 void Viewer::mouse_motion( int x, int y ) {
-    // TODO: code later
+    int new_x = (init_window_length/2)-x;
+    int new_y = (init_window_height/2)-y;
+    camera_yaw += (float)new_x * mouse_sensitivity;
+    camera_pitch += (float)new_y * mouse_sensitivity;
+    //std::cout << camera_yaw << " " << camera_pitch << std::endl;
 }
+
+void Viewer::move_camera() {
+    if( first_render ) {
+        gluLookAt( 0, 0.0f, 0, 0, 0, 0, 0.0f, 1.0f, 0.0f); 
+        first_render = false;
+    }
+
+    if( camera_pitch >=  89) camera_pitch =  89;
+    if( camera_pitch <= -89) camera_pitch = -89;
+    glRotatef(-camera_pitch, 1.0, 0.0, 0.0);
+    glRotatef(-camera_yaw, 0.0, 1.0, 0.0);
+}
+
+void Viewer::timer(int) {
+    glutPostRedisplay();
+    //glutWarpPointer(init_window_length/2, init_window_height/2);
+    glutTimerFunc(1000/60, timer, 0);
+} 
 
 
 // Iterate through the models vector and render each depending on topology type
 void Viewer::model_display() {
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    move_camera();
 
     // if camera moved, gluLookAt
 
@@ -209,6 +245,7 @@ void Viewer::model_display() {
                     glVertex3f( model->vertices[i+2].x, model->vertices[i+2].y, model->vertices[i+2].z);
                     glVertex3f( model->vertices[i+3].x, model->vertices[i+3].y, model->vertices[i+3].z);
                 }
+                glEnd();
             } else if( model->topography == MODEL_TRIANGLES ) {
                 glBegin(GL_TRIANGLES);
                 glColor3f(0.4f, 0.4f, 0.4f);    // Set to color of quad
@@ -217,11 +254,25 @@ void Viewer::model_display() {
                     glVertex3f( model->vertices[i+1].x, model->vertices[i+1].y, model->vertices[i+1].z);
                     glVertex3f( model->vertices[i+2].x, model->vertices[i+2].y, model->vertices[i+2].z);
                 }
+                glEnd();
+            } else if( model->topography == MODEL_LINES ) {
+                glBegin(GL_LINES);
+                glLineWidth(0.001);
+                glColor3f(0.4f, 0.4f, 0.4f);    
+                for( size_t i = 0; i < model->geometry.size(); i+=2 ) {
+                    glVertex3f( model->vertices[model->geometry[i]].x,
+                                model->vertices[model->geometry[i]].y,
+                                model->vertices[model->geometry[i]].z );
+
+                    glVertex3f( model->vertices[model->geometry[i+1]].x,
+                                model->vertices[model->geometry[i+1]].y,
+                                model->vertices[model->geometry[i+1]].z );
+                }
+                glEnd();
             } else {
                 throw ViewerException(UNKNOWN_TOPOLOGY);
                 return;
             }
-            glEnd();
         }
 
         if( show_normals) {
@@ -232,5 +283,6 @@ void Viewer::model_display() {
             glEnd();
         }
     }
+    glutSwapBuffers();
 }
 } // namespace

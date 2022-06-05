@@ -88,19 +88,22 @@ class Viewer {
         // Variables
         static std::vector<Model*> models;
         static constexpr float last_mouse_x = 0, last_mouse_y = 0;
-        const float mouse_sensitivity = 0.0001f;
-        float camera_pitch = 0, camera_yaw = 0; // in radians
+        static const float mouse_sensitivity;
+        static float camera_pitch, camera_yaw; // in radians
 
         // Calibration
         static double fovy, z_near, z_far;
         static int init_window_length, init_window_height;
         static int init_window_pos_x, init_window_pos_y;
+        static bool first_render;
 
         void check_calibration_sanity();
 
         // OpenGL Functions
         static void reshape( GLsizei width, GLsizei height );
         static void mouse_motion( int x, int y );
+        static void move_camera();
+        static void timer(int);
         static void model_display();
 };
 
