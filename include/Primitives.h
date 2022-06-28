@@ -177,8 +177,5 @@ Object Cube( int dimension ) {
 }
 
 
-
-
-
 } // namespace
 #endif
